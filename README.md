@@ -9,7 +9,7 @@ A decision-support tool for a small town that wants to build a **district heatin
   <br><em>Optimal network for one heat source (phase 1, equity on surface). Red: source. Green: connected buildings. Grey: not connected. Pipe color and width: heat flow (kW).</em>
 </p>
 
-📄 **Reports (French):** [Final report](docs/reports/PRONTO_final_report_FR.pdf) · [Mathematical model](docs/reports/PRONTO_math_model_FR.pdf)
+📄 **Reports:** English: [Final report](docs/reports/PRONTO_final_report_EN.pdf) · [Mathematical model](docs/reports/PRONTO_math_model_EN.pdf) | Français : [Rapport final](docs/reports/PRONTO_final_report_FR.pdf) · [Modèle mathématique](docs/reports/PRONTO_math_model_FR.pdf)
 
 ---
 
@@ -69,7 +69,7 @@ What the town hall asked for (requirements specification):
 │   ├── phase2_solution.txt            # pipes built and heat flows
 │   └── phase2_heat_network.png
 ├── docs/
-│   ├── reports/                       # final report + mathematical model (FR)
+│   ├── reports/                       # final report + mathematical model (EN + FR)
 │   └── images/
 ├── requirements.txt
 └── README.md
