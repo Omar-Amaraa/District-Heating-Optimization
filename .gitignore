@@ -1,0 +1,17 @@
+# School documents, drafts and team material kept locally only
+_private/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Office / OS temp files
+~$*
+.~lock.*
+*.tmp
+.DS_Store
+Thumbs.db
+desktop.ini
