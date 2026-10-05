@@ -1,4 +1,4 @@
-# PRONTO: District Heating Network Optimization (MILP + PSO)
+# District Heating Network Optimization (MILP + PSO)
 
 **IMT Atlantique · PRONTO project "Chaud pour décider ?" · Semester 6, 2025–2026**
 
