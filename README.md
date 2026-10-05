@@ -79,52 +79,52 @@ What the town hall asked for (requirements specification):
 
 ## Mathematical model (phase 1: one known source)
 
-The town is a graph: each building is a **node** $i \in V$ and each possible pipe between two buildings is an **edge** $e_{ij}$. The source is the node $v_0$.
+The town is a graph: each building is a **node** $`i \in V`$ and each possible pipe between two buildings is an **edge** $`e_{ij}`$. The source is the node $`v_0`$.
 
 ### Parameters
 
 | Symbol | Meaning | Unit |
 |---|---|---|
-| $l_{ij}$ | Length of pipe $e_{ij}$: $l_{ij} = \sqrt{(x_j-x_i)^2 + (y_j-y_i)^2}$ | m |
-| $c^{fix}_{ij}$, $c^{var}_{ij}$ | Fixed and variable (per kW) cost of pipe $e_{ij}$ | €/m, €/(m·kW) |
-| $c^{om}_{ij}$ | Maintenance cost of pipe $e_{ij}$ | €/year |
-| $c^{heat}$, $c^{rev}$ | Heat generation cost and selling price | €/kWh |
-| $\theta^{fix}_{ij}$, $\theta^{var}_{ij}$ | Fixed and variable heat losses on $e_{ij}$ | kW/m, kW/(kW·m) |
-| $d_j$ | Peak demand of node $j$ | kW |
-| $D_j = S_j \times SC_j$ | Yearly demand: surface × consumption per m² | kWh/year |
-| $C^{max}_{ij}$ | Maximum capacity of pipe $e_{ij}$ | kW |
-| $Q^{max}$ | Maximum power the source can deliver | kW |
-| $\alpha$, $\lambda$, $\beta$ | Investment annuity factor, connection quota, competition effect | – |
-| $\mu_t$, $N_{jt}$ | Minimum share for building type $t$; $N_{jt}=1$ if node $j$ is of type $t$ | – |
+| $`l_{ij}`$ | Length of pipe $`e_{ij}`$: $`l_{ij} = \sqrt{(x_j-x_i)^2 + (y_j-y_i)^2}`$ | m |
+| $`c^{fix}_{ij}`$, $`c^{var}_{ij}`$ | Fixed and variable (per kW) cost of pipe $`e_{ij}`$ | €/m, €/(m·kW) |
+| $`c^{om}_{ij}`$ | Maintenance cost of pipe $`e_{ij}`$ | €/year |
+| $`c^{heat}`$, $`c^{rev}`$ | Heat generation cost and selling price | €/kWh |
+| $`\theta^{fix}_{ij}`$, $`\theta^{var}_{ij}`$ | Fixed and variable heat losses on $`e_{ij}`$ | kW/m, kW/(kW·m) |
+| $`d_j`$ | Peak demand of node $`j`$ | kW |
+| $`D_j = S_j \times SC_j`$ | Yearly demand: surface × consumption per m² | kWh/year |
+| $`C^{max}_{ij}`$ | Maximum capacity of pipe $`e_{ij}`$ | kW |
+| $`Q^{max}`$ | Maximum power the source can deliver | kW |
+| $`\alpha`$, $`\lambda`$, $`\beta`$ | Investment annuity factor, connection quota, competition effect | – |
+| $`\mu_t`$, $`N_{jt}`$ | Minimum share for building type $`t`$; $`N_{jt}=1`$ if node $`j`$ is of type $`t`$ | – |
 
 ### Decision variables
 
-- $X_{ij} \in \{0,1\}$: do we build the pipe from $i$ to $j$?
-- $p^{in}_{ij} \ge 0$: power entering pipe $e_{ij}$
-- $p^{out}_{ij} \ge 0$: power leaving pipe $e_{ij}$, after losses and after serving node $j$
+- $`X_{ij} \in \{0,1\}`$: do we build the pipe from $`i`$ to $`j`$?
+- $`p^{in}_{ij} \ge 0`$: power entering pipe $`e_{ij}`$
+- $`p^{out}_{ij} \ge 0`$: power leaving pipe $`e_{ij}`$, after losses and after serving node $`j`$
 
 ### Objective: minimize the net yearly cost
 
-$$
+```math
 Z = \underbrace{\sum_{i,j} X_{ij}\, l_{ij}\left(c^{om}_{ij} + \alpha\, c^{fix}_{ij}\right)}_{\text{maintenance + fixed pipe cost}}
   + \underbrace{\sum_{i,j} \alpha\, c^{var}_{ij}\, l_{ij}\, p^{in}_{ij}}_{\text{variable pipe cost}}
   + \underbrace{\sum_{i,j} \lambda\, X_{ij}\, c^{heat} D_j}_{\text{heat generation}}
   - \underbrace{\sum_{i,j} c^{rev} D_j\, \lambda\, X_{ij}}_{\text{revenue}}
-$$
+```
 
-Because the network is a tree, $\sum_i X_{ij} = 1$ exactly when building $j$ is connected, so the last two terms count the heat sold to the connected buildings. A **negative** $Z$ means the network earns more than it costs.
+Because the network is a tree, $`\sum_i X_{ij} = 1`$ exactly when building $`j`$ is connected, so the last two terms count the heat sold to the connected buildings. A **negative** $`Z`$ means the network earns more than it costs.
 
 ### Constraints
 
 | Constraint | Equation |
 |---|---|
-| **Tree structure:** each node has at most one parent, and no pipe from a node to itself | $\displaystyle\sum_{i \neq j} X_{ij} \le 1 \;\; \forall j, \qquad X_{ii} = 0$ |
-| **One direction** per pair of nodes | $X_{ij} + X_{ji} \le 1 \quad \forall i \neq j$ |
-| **Heat balance on a pipe:** what comes out = what goes in, minus losses, minus what node $j$ consumes | $p^{out}_{ij} = \left(1 - \theta^{var}_{ij} l_{ij}\right) p^{in}_{ij} - \left(d_j \beta \lambda + \theta^{fix}_{ij} l_{ij}\right) X_{ij}$ |
-| **Energy conservation** at every node except the source | $\displaystyle\sum_{i} p^{out}_{ij} - \sum_{k} p^{in}_{jk} = 0 \quad \forall j \neq v_0$ |
-| **Pipe capacity:** no flow in a pipe that is not built | $p^{in}_{ij} \le C^{max}_{ij} X_{ij}$ |
-| **Nothing flows into the source** | $\displaystyle\sum_{i} X_{i v_0} = 0$ |
-| **Source capacity** | $\displaystyle\sum_{j} p^{in}_{v_0 j} \le Q^{max}$ |
+| **Tree structure:** each node has at most one parent, and no pipe from a node to itself | $`\displaystyle\sum_{i \neq j} X_{ij} \le 1 \;\; \forall j, \qquad X_{ii} = 0`$ |
+| **One direction** per pair of nodes | $`X_{ij} + X_{ji} \le 1 \quad \forall i \neq j`$ |
+| **Heat balance on a pipe:** what comes out = what goes in, minus losses, minus what node $`j`$ consumes | $`p^{out}_{ij} = \left(1 - \theta^{var}_{ij} l_{ij}\right) p^{in}_{ij} - \left(d_j \beta \lambda + \theta^{fix}_{ij} l_{ij}\right) X_{ij}`$ |
+| **Energy conservation** at every node except the source | $`\displaystyle\sum_{i} p^{out}_{ij} - \sum_{k} p^{in}_{jk} = 0 \quad \forall j \neq v_0`$ |
+| **Pipe capacity:** no flow in a pipe that is not built | $`p^{in}_{ij} \le C^{max}_{ij} X_{ij}`$ |
+| **Nothing flows into the source** | $`\displaystyle\sum_{i} X_{i v_0} = 0`$ |
+| **Source capacity** | $`\displaystyle\sum_{j} p^{in}_{v_0 j} \le Q^{max}`$ |
 
 ### Three ways to write fairness (equity)
 
@@ -132,11 +132,11 @@ We modelled the town hall's fairness requirement in three ways, with one noteboo
 
 | Equity rule | Equation | Notebook |
 |---|---|---|
-| **Building type:** each type gets at least its share of the pipes | $\displaystyle\sum_{i \neq j} N_{jt} X_{ij} \ge \mu_t \sum_{i \neq j} X_{ij} \quad \forall t$ | `equity_building_type.ipynb` |
-| **Demand threshold:** connected buildings represent at least $\gamma$ of the total demand | $\displaystyle\sum_{i,j} D_j X_{ij} \ge \gamma \sum_i D_i$ | `equity_demand_threshold.ipynb` |
-| **Surface threshold:** connected buildings cover at least $\gamma$ of the total surface | $\displaystyle\sum_{i,j} S_j X_{ij} \ge \gamma \sum_i S_i$ | `equity_surface_threshold.ipynb` |
+| **Building type:** each type gets at least its share of the pipes | $`\displaystyle\sum_{i \neq j} N_{jt} X_{ij} \ge \mu_t \sum_{i \neq j} X_{ij} \quad \forall t`$ | `equity_building_type.ipynb` |
+| **Demand threshold:** connected buildings represent at least $`\gamma`$ of the total demand | $`\displaystyle\sum_{i,j} D_j X_{ij} \ge \gamma \sum_i D_i`$ | `equity_demand_threshold.ipynb` |
+| **Surface threshold:** connected buildings cover at least $`\gamma`$ of the total surface | $`\displaystyle\sum_{i,j} S_j X_{ij} \ge \gamma \sum_i S_i`$ | `equity_surface_threshold.ipynb` |
 
-We used $\gamma = 0.4$ and **kept the surface rule**. For a town, it seemed fairer to spread the network across neighbourhoods than to follow only the biggest consumers.
+We used $`\gamma = 0.4`$ and **kept the surface rule**. For a town, it seemed fairer to spread the network across neighbourhoods than to follow only the biggest consumers.
 
 ---
 
@@ -144,23 +144,23 @@ We used $\gamma = 0.4$ and **kept the surface rule**. For a town, it seemed fair
 
 In phase 2, the town can place the source at one of **10 candidate sites**. Each source mixes renewable heat and gas:
 
-- installed power $P$, of which renewable $P_{ENR} = \min(P, P^{max}_{ENR})$ and gas $P_{gas} = P - P_{ENR}$
-- heat delivered per year $Q = 8766\,\text{h} \times \sum_j p^{in}_{sj}$
-- a **50 % investment subsidy** when the gas share $g$ is at most 50 %
+- installed power $`P`$, of which renewable $`P_{ENR} = \min(P, P^{max}_{ENR})`$ and gas $`P_{gas} = P - P_{ENR}`$
+- heat delivered per year $`Q = 8766\,\text{h} \times \sum_j p^{in}_{sj}`$
+- a **50 % investment subsidy** when the gas share $`g`$ is at most 50 %
 
-For a fixed source $s$, power $P$ and gas share $g$, the MILP (`milp.py`) keeps the phase 1 constraints (with the surface equity rule). The heat generation term is replaced by:
+For a fixed source $`s`$, power $`P`$ and gas share $`g`$, the MILP (`milp.py`) keeps the phase 1 constraints (with the surface equity rule). The heat generation term is replaced by:
 
-$$
+```math
 Z(s, P, g) = \dots + \left(P_{gas}\, c^{inv}_{gas} + P_{ENR}\, c^{inv}_{ENR}\right)\left(1 - 0.5\cdot\mathbb{1}[g \le 0.5]\right) + Q\, g\, c_{gas}
-$$
+```
 
-and the source capacity becomes $\sum_j p^{in}_{sj} \le P$.
+and the source capacity becomes $`\sum_j p^{in}_{sj} \le P`$.
 
-The gas share $g$ depends on $P$ and $Q$, which makes the problem **non-linear**. So we wrapped the MILP in a **particle swarm optimization (PSO)**. Each "particle" is a candidate pair $(P, g)$, and its score is the MILP cost plus a penalty that grows when the assumed gas share disagrees with the gas share recomputed afterwards:
+The gas share $`g`$ depends on $`P`$ and $`Q`$, which makes the problem **non-linear**. So we wrapped the MILP in a **particle swarm optimization (PSO)**. Each "particle" is a candidate pair $`(P, g)`$, and its score is the MILP cost plus a penalty that grows when the assumed gas share disagrees with the gas share recomputed afterwards:
 
-$$
+```math
 \text{score}(P, g) = A \cdot Z^*(s, P, g) + B \cdot \left|\, g_{post}(P) - g \,\right| \cdot Q \cdot c_{gas}, \qquad A = 1,\; B = 100
-$$
+```
 
 <p align="center">
   <img src="docs/images/phase2_pso_milp_algorithm.png" width="460" alt="PSO-MILP loop: the PSO proposes P_installed and gas share, the MILP returns the cost, the score combines cost and gas-share error">
@@ -175,11 +175,11 @@ The particles of a swarm are evaluated **in parallel** (`multiprocessing.Pool`).
 
 ### Phase 1: one source
 
-| Equity rule | Buildings connected | Optimal cost $Z$ |
+| Equity rule | Buildings connected | Optimal cost $`Z`$ |
 |---|---|---|
 | Building type | 17 / 20 | −708,531.93 € |
-| Demand threshold ($\gamma = 0.4$) | 18 / 20 | −711,219.31 € |
-| **Surface threshold ($\gamma = 0.4$), kept** | **18 / 20** | **−711,219.31 €** |
+| Demand threshold ($`\gamma = 0.4`$) | 18 / 20 | −711,219.31 € |
+| **Surface threshold ($`\gamma = 0.4`$), kept** | **18 / 20** | **−711,219.31 €** |
 
 All three runs reached solver status **Optimal**. The negative costs mean the network is profitable over the period modelled.
 
